@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Studio Clock</title>
+
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Roboto:ital,wght@1,900&display=swap" rel="stylesheet">
+
+<style>
+@font-face {
+	font-family: 'Lilita One', sans-serif;
+	
+}
+
+body {
+	background-color: #000000;
+}
+
+svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font-family: dotmatrix;
+}
+svg .markers {
+  fill: none;
+  stroke: #ff0043;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: bevel;
+}
+svg .five {
+  stroke-dasharray: 0, 91.6297857297;
+}
+svg .sixty {
+  stroke-dasharray: 0, 16.7551608191;
+}
+svg .mask {
+  stroke: white;
+  stroke-dasharray: 1005.3096491488;
+  transform: rotateZ(-90deg);
+  transform-origin: center;
+  -webkit-animation: offset 60s linear infinite;
+          animation: offset 60s linear infinite;
+}
+@-webkit-keyframes offset {
+  from {
+    stroke-dashoffset: 1013.6872295584;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes offset {
+  from {
+    stroke-dashoffset: 1013.6872295584;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+svg .hours.minutes, svg .seconds, svg .date {
+  fill: #dd5a7d;
+  font-size: 62pt;
+  font-family: dotmatrix, sans-serif;
+  text-anchor: middle;
+  letter-spacing: -0.05em;
+}
+svg .seconds {
+  font-size:52pt;
+}
+svg .date {
+  font-size:28pt;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- base setup taken from https://codepen.io/r0b/pen/WoYxZm -->
+
+<svg version="1.1" viewBox="0 0 400 400" preserveAspectRatio="xMidYMax meet">
+	<defs>
+		<mask id="mask60s">
+      <circle class="markers mask" cx="200" cy="200" r="160"/>
+    </mask>
+  </defs>
+  <circle class="markers five" cx="200" cy="200" r="175"/>
+	<circle class="markers sixty" cx="200" cy="200" r="160" mask="url(#mask60s)"/>
+  <text class="date" x="200" y="135" dx="8">Dec 31</text>
+  <text class="hours minutes" x="200" y="225" dx="8"></text>
+  <text class="seconds" x="200" y="308" dx="8"></text>
+</svg>
+
+<script>
+// month names
+const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+// inital offsets
+const oneSecond = 1000;
+const now = new Date();
+const offsetSeconds = now.getSeconds();
+const offsetMilliSeconds = now.getMilliseconds();
+const initialOffset = offsetSeconds + offsetMilliSeconds / oneSecond;
+// set mask animation delay to account for the inital offset
+document.querySelector( '.markers.mask' ).style.animationDelay = `-${initialOffset}s`
+// update
+const pad = num => `00${num}`.substr(-2);
+const update = () => {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  const day = now.getDate();
+  const month = monthNames[now.getMonth()];
+  const date = month + ' ' + day;
+  const $date = document.querySelector('svg .date');
+  const time = `${pad(hours)}:${pad(minutes)}`;
+  const $time = document.querySelector('svg .hours.minutes');
+  const secs = pad(seconds);
+  const $secs = document.querySelector('svg .seconds');
+  if (time !== $time.textContent)
+  $time.textContent = time;
+  if (secs !== $secs.textContent)
+  $secs.textContent = secs;
+  if (date !== $date.textContent)
+  $date.textContent = date;
+};
+// quick update
+update();
+// then start updating at the right time
+setTimeout(
+() => setInterval(update, oneSecond),
+oneSecond - offsetMilliSeconds);
+
+</script>
+
+</body>
+</html>
